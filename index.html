@@ -2,13 +2,17 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#8b5cf6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Chat-Bruti - Assistant IA</title>
 <style>
     * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
     }
     
     body {
@@ -17,6 +21,8 @@
         height: 100vh;
         overflow: hidden;
         transition: background 0.3s ease;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
     
     body.dark-mode {
@@ -730,12 +736,13 @@
     /* Mobile */
     @media (max-width: 768px) {
         .sidebar {
-            position: absolute;
+            position: fixed;
             left: 0;
             top: 0;
             height: 100%;
             z-index: 100;
             transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
         
         .sidebar.open {
@@ -743,21 +750,145 @@
         }
         
         .toggle-sidebar {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            font-size: 20px;
+        }
+        
+        .dark-mode .toggle-sidebar {
+            background: #2a2a2a;
+            color: #f9fafb;
+        }
+        
+        .chat-header {
+            padding: 12px 16px;
+        }
+        
+        .chat-title {
+            font-size: 16px;
+        }
+        
+        .chat-title span {
+            display: none;
+        }
+        
+        .header-robot {
+            width: 35px;
+            height: 45px;
+        }
+        
+        .header-actions {
+            gap: 8px;
+        }
+        
+        .theme-toggle {
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
         }
         
         .chat-body {
-            padding: 16px;
+            padding: 12px;
+            gap: 16px;
         }
         
         .robot {
-            width: 100px;
-            height: 120px;
+            width: 90px;
+            height: 110px;
         }
         
         .robot-head {
-            width: 70px;
-            height: 60px;
+            width: 60px;
+            height: 55px;
+        }
+        
+        .robot-body {
+            width: 50px;
+            height: 40px;
+        }
+        
+        .empty-title {
+            font-size: 22px;
+        }
+        
+        .empty-subtitle {
+            font-size: 14px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        
+        .message-group {
+            gap: 12px;
+        }
+        
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+        }
+        
+        .message-text {
+            font-size: 14px;
+        }
+        
+        .input-area {
+            padding: 12px;
+        }
+        
+        .input-container {
+            padding: 10px 12px;
+        }
+        
+        #userInput {
+            font-size: 16px; /* Empêche le zoom sur iOS */
+        }
+        
+        .send-btn {
+            width: 36px;
+            height: 36px;
+        }
+        
+        .send-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .app-container {
+            max-width: 100%;
+        }
+        
+        .sidebar {
+            width: 260px;
+        }
+        
+        .chat-title span {
+            display: none;
+        }
+        
+        .empty-title {
+            font-size: 20px;
+        }
+        
+        .robot {
+            width: 80px;
+            height: 100px;
+        }
+        
+        .robot-head {
+            width: 55px;
+            height: 50px;
+        }
+        
+        .robot-body {
+            width: 45px;
+            height: 35px;
         }
     }
     
@@ -770,10 +901,64 @@
         bottom: 0;
         background: rgba(0,0,0,0.5);
         z-index: 99;
+        backdrop-filter: blur(2px);
     }
     
     .overlay.show {
         display: block;
+    }
+    
+    /* Amélioration du scroll sur mobile */
+    .chat-body::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .chat-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .chat-body::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 4px;
+    }
+    
+    .dark-mode .chat-body::-webkit-scrollbar-thumb {
+        background: #4b5563;
+    }
+    
+    /* Fix pour les petits écrans */
+    @media (max-height: 600px) {
+        .empty-state {
+            padding: 20px;
+        }
+        
+        .robot-container {
+            margin-bottom: 16px;
+        }
+        
+        .robot {
+            width: 70px;
+            height: 90px;
+        }
+        
+        .robot-head {
+            width: 50px;
+            height: 45px;
+        }
+        
+        .robot-body {
+            width: 40px;
+            height: 30px;
+        }
+        
+        .empty-title {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+        
+        .empty-subtitle {
+            font-size: 13px;
+        }
     }
 </style>
 </head>
@@ -1141,7 +1326,26 @@ function handleKeyPress(e) {
 function toggleSidebar() {
     sidebar.classList.toggle('open');
     overlay.classList.toggle('show');
+    
+    // Empêcher le scroll du body quand la sidebar est ouverte sur mobile
+    if (sidebar.classList.contains('open')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
 }
+
+// Fermer la sidebar quand on clique en dehors
+overlay.addEventListener('click', () => {
+    toggleSidebar();
+});
+
+// Fermer la sidebar avec la touche Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+        toggleSidebar();
+    }
+});
 
 // Auto-resize textarea
 userInput.addEventListener('input', function() {
@@ -1149,10 +1353,27 @@ userInput.addEventListener('input', function() {
     this.style.height = Math.min(this.scrollHeight, 200) + 'px';
 });
 
+// Empêcher le zoom sur double-tap sur iOS
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
 // Initialiser avec une nouvelle conversation
 if (conversations.length === 0) {
     startNewChat();
 }
+
+// Ajuster la hauteur sur changement d'orientation
+window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }, 100);
+});
 </script>
 </body>
 </html>
