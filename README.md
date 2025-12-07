@@ -1,6 +1,6 @@
 # 🤖 Chat-Bruti
 
-Une application de chatbot moderne et interactive avec un robot animé intelligent qui répond à vos questions en temps réel.
+Une application de chatbot moderne et interactive avec un robot animé abruti qui répond à vos questions en temps réel en les ramenant au contexte du NIRD.
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -98,6 +98,7 @@ L'application communique avec un backend via l'endpoint :
 ```
 https://chatbrutiapi.onrender.com/chat
 ```
+Le depot du backend est à l'adresse https://github.com/Chris-Manuelpipo/ChatBruti
 
 Pour utiliser votre propre API, modifiez la ligne suivante dans `index.html` :
 
@@ -193,9 +194,7 @@ chat-bruti/
 │
 ├── index.html          # Application complète (HTML + CSS + JS)
 ├── README.md           # Cette documentation
-└── assets/             # Ressources (optionnel)
-    └── images/
-        └── robot.png   # Image du robot (si externe)
+
 ```
 
 ## 🔧 Personnalisation
@@ -288,25 +287,10 @@ Les contributions sont les bienvenues ! Pour contribuer :
 
 ## 📞 Contact
 
-- **Créateur** : Votre Nom
-- **Email** : votre.email@example.com
-- **GitHub** : [@votre-username](https://github.com/votre-username)
-- **Twitter** : [@votre_handle](https://twitter.com/votre_handle)
+- **Créateur** : ETCHOME Chris -- TEAM ENSPY -- NUIT DE L'INFO 2025 
+- **Email** : etchomechris2000@gmail.com
+- **GitHub** : [@Chris-Manuelpipo](https://github.com/Chris-Manuelpipo)
 
-## 🙏 Remerciements
-
-- Inspiré par [Claude AI](https://claude.ai) d'Anthropic
-- Icônes emoji pour l'interface
-- Communauté open-source pour l'inspiration
-
-## 📊 Statistiques
-
-- **Lignes de code** : ~800 lignes
-- **Taille** : ~25 KB (minifié)
-- **Performance** : 100/100 Lighthouse
-- **Compatibilité** : Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
-
----
 
 **Made with ❤️ and lots of ☕**
 
