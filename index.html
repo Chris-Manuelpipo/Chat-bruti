@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat-Bruti - Assistant IA</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        background: #f5f5f5;
+        height: 100vh;
+        overflow: hidden;
+        transition: background 0.3s ease;
+    }
+    
+    body.dark-mode {
+        background: #1a1a1a;
+    }
+    
+    .app-container {
+        display: flex;
+        height: 100vh;
+        max-width: 1800px;
+        margin: 0 auto;
+        background: white;
+        box-shadow: 0 0 50px rgba(0,0,0,0.1);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .dark-mode .app-container {
+        background: #0f0f0f;
+        box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    }
+    
+    /* Sidebar - Historique */
+    .sidebar {
+        width: 280px;
+        background: #f9fafb;
+        border-right: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s, background 0.3s ease, border-color 0.3s ease;
+    }
+    
+    .dark-mode .sidebar {
+        background: #1a1a1a;
+        border-right: 1px solid #2a2a2a;
+    }
+    
+    .sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        transition: border-color 0.3s ease;
+    }
+    
+    .dark-mode .sidebar-header {
+        border-bottom: 1px solid #2a2a2a;
+    }
+    
+    .new-chat-btn {
+        width: 100%;
+        padding: 12px 16px;
+        background: #8b5cf6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+    
+    .new-chat-btn:hover {
+        background: #7c3aed;
+    }
+    
+    .history-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px;
+    }
+    
+    .history-item {
+        padding: 12px 14px;
+        margin-bottom: 4px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #374151;
+        transition: background 0.2s, color 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .dark-mode .history-item {
+        color: #d1d5db;
+    }
+    
+    .history-item:hover {
+        background: #e5e7eb;
+    }
+    
+    .dark-mode .history-item:hover {
+        background: #2a2a2a;
+    }
+    
+    .history-item.active {
+        background: #ede9fe;
+        color: #7c3aed;
+        font-weight: 500;
+    }
+    
+    .dark-mode .history-item.active {
+        background: #2d1b4e;
+        color: #a78bfa;
+    }
+    
+    /* Chat Area */
+    .chat-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+    
+    .chat-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .dark-mode .chat-header {
+        border-bottom: 1px solid #2a2a2a;
+    }
+    
+    .chat-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: color 0.3s ease;
+    }
+    
+    .dark-mode .chat-title {
+        color: #f9fafb;
+    }
+    
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .theme-toggle {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: #f3f4f6;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        transition: background 0.2s, transform 0.2s;
+    }
+    
+    .theme-toggle:hover {
+        background: #e5e7eb;
+        transform: scale(1.05);
+    }
+    
+    .dark-mode .theme-toggle {
+        background: #2a2a2a;
+        color: #fbbf24;
+    }
+    
+    .dark-mode .theme-toggle:hover {
+        background: #374151;
+    }
+    
+    .header-robot {
+        width: 40px;
+        height: 50px;
+        position: relative;
+        flex-shrink: 0;
+    }
+    
+    .header-robot .robot-head {
+        width: 30px;
+        height: 28px;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+        border-radius: 8px;
+        position: relative;
+        margin: 0 auto;
+        box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+    }
+    
+    .header-robot .robot-antenna {
+        width: 2px;
+        height: 8px;
+        background: #6366f1;
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .header-robot .robot-antenna::after {
+        content: '';
+        width: 4px;
+        height: 4px;
+        background: #ef4444;
+        border-radius: 50%;
+        position: absolute;
+        top: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: blink 2s infinite;
+    }
+    
+    .header-robot .robot-eyes {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        padding-top: 8px;
+    }
+    
+    .header-robot .robot-eye {
+        width: 5px;
+        height: 5px;
+        background: white;
+        border-radius: 50%;
+        position: relative;
+        animation: eyeMove 4s infinite;
+    }
+    
+    .header-robot .robot-eye::after {
+        content: '';
+        width: 3px;
+        height: 3px;
+        background: #1f2937;
+        border-radius: 50%;
+        position: absolute;
+        top: 1px;
+        left: 1px;
+        transition: transform 0.3s ease;
+    }
+    
+    .header-robot.looking-down .robot-eye::after {
+        transform: translate(0px, 2px);
+    }
+    
+    .header-robot.looking-left .robot-eye::after {
+        transform: translate(-1px, 0px);
+    }
+    
+    .header-robot.looking-right .robot-eye::after {
+        transform: translate(1px, 0px);
+    }
+    
+    .header-robot.excited {
+        animation: bounce 0.5s ease;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0) scale(1); }
+        25% { transform: translateY(-5px) scale(1.05); }
+        50% { transform: translateY(0) scale(0.95); }
+        75% { transform: translateY(-3px) scale(1.02); }
+    }
+    
+    .header-robot .robot-mouth {
+        width: 12px;
+        height: 6px;
+        border: 2px solid white;
+        border-top: none;
+        border-radius: 0 0 6px 6px;
+        position: absolute;
+        bottom: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        transition: height 0.1s, border-radius 0.1s;
+    }
+    
+    .header-robot.talking .robot-mouth {
+        animation: talk 0.3s infinite;
+    }
+    
+    @keyframes talk {
+        0%, 100% { 
+            height: 6px;
+            border-radius: 0 0 6px 6px;
+        }
+        50% { 
+            height: 10px;
+            border-radius: 0 0 8px 8px;
+        }
+    }
+    
+    .header-robot .robot-body {
+        width: 24px;
+        height: 20px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border-radius: 4px;
+        margin: 3px auto 0;
+        position: relative;
+    }
+    
+    .header-robot .robot-arm {
+        width: 3px;
+        height: 16px;
+        background: #6366f1;
+        border-radius: 2px;
+        position: absolute;
+        top: 2px;
+    }
+    
+    .header-robot .robot-arm.left {
+        left: -5px;
+        animation: waveLeft 2s infinite;
+        transform-origin: top center;
+    }
+    
+    .header-robot .robot-arm.right {
+        right: -5px;
+        animation: waveRight 2s infinite;
+        transform-origin: top center;
+    }
+    
+    .header-robot.thinking .robot-arm.left {
+        animation: thinkingLeft 1s infinite;
+    }
+    
+    .header-robot.thinking .robot-arm.right {
+        animation: thinkingRight 1s infinite;
+    }
+    
+    @keyframes thinkingLeft {
+        0%, 100% { transform: rotate(-10deg); }
+        50% { transform: rotate(-30deg); }
+    }
+    
+    @keyframes thinkingRight {
+        0%, 100% { transform: rotate(10deg); }
+        50% { transform: rotate(30deg); }
+    }
+    
+    .toggle-sidebar {
+        display: none;
+        padding: 8px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 20px;
+    }
+    
+    .chat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        transition: background 0.3s ease;
+    }
+    
+    .dark-mode .chat-body {
+        background: #0f0f0f;
+    }
+    
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #6b7280;
+        transition: color 0.3s ease;
+    }
+    
+    .dark-mode .empty-state {
+        color: #9ca3af;
+    }
+    
+    .robot-container {
+        margin-bottom: 24px;
+    }
+    
+    .robot {
+        width: 120px;
+        height: 140px;
+        position: relative;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .robot-head {
+        width: 80px;
+        height: 70px;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+        border-radius: 20px;
+        position: relative;
+        margin: 0 auto;
+        box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+    
+    .robot-antenna {
+        width: 3px;
+        height: 20px;
+        background: #6366f1;
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .robot-antenna::after {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #ef4444;
+        border-radius: 50%;
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: blink 2s infinite;
+    }
+    
+    .robot-eyes {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        padding-top: 20px;
+    }
+    
+    .robot-eye {
+        width: 12px;
+        height: 12px;
+        background: white;
+        border-radius: 50%;
+        position: relative;
+        animation: eyeMove 4s infinite;
+    }
+    
+    .robot-eye::after {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: #1f2937;
+        border-radius: 50%;
+        position: absolute;
+        top: 3px;
+        left: 3px;
+    }
+    
+    .robot-mouth {
+        width: 30px;
+        height: 15px;
+        border: 3px solid white;
+        border-top: none;
+        border-radius: 0 0 15px 15px;
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .robot-body {
+        width: 60px;
+        height: 50px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border-radius: 10px;
+        margin: 8px auto 0;
+        position: relative;
+    }
+    
+    .robot-arm {
+        width: 8px;
+        height: 40px;
+        background: #6366f1;
+        border-radius: 4px;
+        position: absolute;
+        top: 5px;
+    }
+    
+    .robot-arm.left {
+        left: -12px;
+        animation: waveLeft 2s infinite;
+    }
+    
+    .robot-arm.right {
+        right: -12px;
+        animation: waveRight 2s infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes blink {
+        0%, 90%, 100% { opacity: 1; }
+        95% { opacity: 0; }
+    }
+    
+    @keyframes eyeMove {
+        0%, 90%, 100% { transform: translateX(0); }
+        45% { transform: translateX(2px); }
+    }
+    
+    @keyframes waveLeft {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-20deg); }
+    }
+    
+    @keyframes waveRight {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(20deg); }
+    }
+    
+    .empty-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 8px;
+        transition: color 0.3s ease;
+    }
+    
+    .dark-mode .empty-title {
+        color: #f9fafb;
+    }
+    
+    .empty-subtitle {
+        font-size: 16px;
+        color: #6b7280;
+        transition: color 0.3s ease;
+    }
+    
+    .dark-mode .empty-subtitle {
+        color: #9ca3af;
+    }
+    
+    .message-group {
+        display: flex;
+        gap: 16px;
+        max-width: 900px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    
+    .message-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    
+    .user-avatar {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .bot-avatar {
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+        color: white;
+    }
+    
+    .message-content {
+        flex: 1;
+        padding-top: 4px;
+    }
+    
+    .message-text {
+        font-size: 15px;
+        line-height: 1.6;
+        color: #111827;
+        transition: color 0.3s ease;
+    }
+    
+    .dark-mode .message-text {
+        color: #e5e7eb;
+    }
+    
+    .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 12px 0;
+    }
+    
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: #8b5cf6;
+        border-radius: 50%;
+        animation: typingBounce 1.4s infinite;
+    }
+    
+    .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-10px); }
+    }
+    
+    /* Input Area */
+    .input-area {
+        padding: 20px 24px;
+        border-top: 1px solid #e5e7eb;
+        background: white;
+        transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    
+    .dark-mode .input-area {
+        background: #0f0f0f;
+        border-top: 1px solid #2a2a2a;
+    }
+    
+    .input-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        position: relative;
+    }
+    
+    .input-container {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 12px 16px;
+        transition: border-color 0.2s, background 0.3s ease;
+    }
+    
+    .dark-mode .input-container {
+        background: #1a1a1a;
+        border: 2px solid #2a2a2a;
+    }
+    
+    .input-container:focus-within {
+        border-color: #8b5cf6;
+        background: white;
+    }
+    
+    .dark-mode .input-container:focus-within {
+        border-color: #8b5cf6;
+        background: #0f0f0f;
+    }
+    
+    #userInput {
+        flex: 1;
+        border: none;
+        background: none;
+        font-size: 15px;
+        color: #111827;
+        outline: none;
+        resize: none;
+        max-height: 200px;
+        font-family: inherit;
+        line-height: 1.5;
+        transition: color 0.3s ease;
+    }
+    
+    .dark-mode #userInput {
+        color: #f9fafb;
+    }
+    
+    #userInput::placeholder {
+        color: #9ca3af;
+        transition: color 0.3s ease;
+    }
+    
+    .dark-mode #userInput::placeholder {
+        color: #6b7280;
+    }
+    
+    .send-btn {
+        width: 40px;
+        height: 40px;
+        background: #8b5cf6;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
+    
+    .send-btn:hover:not(:disabled) {
+        background: #7c3aed;
+    }
+    
+    .send-btn:disabled {
+        background: #d1d5db;
+        cursor: not-allowed;
+    }
+    
+    /* Mobile */
+    @media (max-width: 768px) {
+        .sidebar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            z-index: 100;
+            transform: translateX(-100%);
+        }
+        
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        
+        .toggle-sidebar {
+            display: block;
+        }
+        
+        .chat-body {
+            padding: 16px;
+        }
+        
+        .robot {
+            width: 100px;
+            height: 120px;
+        }
+        
+        .robot-head {
+            width: 70px;
+            height: 60px;
+        }
+    }
+    
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 99;
+    }
+    
+    .overlay.show {
+        display: block;
+    }
+</style>
+</head>
+<body>
+<div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="new-chat-btn" onclick="startNewChat()">
+                <span>➕</span>
+                Nouvelle conversation
+            </button>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- Historique généré dynamiquement -->
+        </div>
+    </div>
+    
+    <!-- Overlay mobile -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- Chat Area -->
+    <div class="chat-area">
+        <div class="chat-header">
+            <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+            <div class="chat-title">
+                <div class="header-robot">
+                    <div class="robot-head">
+                        <div class="robot-antenna"></div>
+                        <div class="robot-eyes">
+                            <div class="robot-eye"></div>
+                            <div class="robot-eye"></div>
+                        </div>
+                        <div class="robot-mouth"></div>
+                    </div>
+                    <div class="robot-body">
+                        <div class="robot-arm left"></div>
+                        <div class="robot-arm right"></div>
+                    </div>
+                </div>
+                <span>Chat-Bruti</span>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+                    🌙
+                </button>
+            </div>
+        </div>
+        
+        <div class="chat-body" id="chatBody">
+            <div class="empty-state" id="emptyState">
+                <div class="robot-container">
+                    <div class="robot">
+                        <div class="robot-head">
+                            <div class="robot-antenna"></div>
+                            <div class="robot-eyes">
+                                <div class="robot-eye"></div>
+                                <div class="robot-eye"></div>
+                            </div>
+                            <div class="robot-mouth"></div>
+                        </div>
+                        <div class="robot-body">
+                            <div class="robot-arm left"></div>
+                            <div class="robot-arm right"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="empty-title">Bienvenue sur Chat-Bruti !</div>
+                <div class="empty-subtitle">Posez-moi n'importe quelle question pour commencer</div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <div class="input-wrapper">
+                <div class="input-container">
+                    <textarea 
+                        id="userInput" 
+                        placeholder="Posez votre question..." 
+                        rows="1"
+                        onkeydown="handleKeyPress(event)"
+                    ></textarea>
+                    <button class="send-btn" onclick="sendMessage()" id="sendBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const chatBody = document.getElementById('chatBody');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const emptyState = document.getElementById('emptyState');
+const historyList = document.getElementById('historyList');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+let conversations = [];
+let currentConversationId = null;
+
+// Robot element
+const headerRobot = document.querySelector('.header-robot');
+let isTyping = false;
+
+// Suivi du curseur pour que le robot regarde
+document.addEventListener('mousemove', (e) => {
+    if (isTyping) return; // Ne pas suivre si en train de taper
+    
+    const robotRect = headerRobot.getBoundingClientRect();
+    const robotCenterX = robotRect.left + robotRect.width / 2;
+    const robotCenterY = robotRect.top + robotRect.height / 2;
+    
+    const deltaX = e.clientX - robotCenterX;
+    const deltaY = e.clientY - robotCenterY;
+    
+    // Retirer toutes les classes de direction
+    headerRobot.classList.remove('looking-left', 'looking-right', 'looking-down');
+    
+    // Déterminer la direction
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX < -50) {
+            headerRobot.classList.add('looking-left');
+        } else if (deltaX > 50) {
+            headerRobot.classList.add('looking-right');
+        }
+    } else if (deltaY > 100) {
+        headerRobot.classList.add('looking-down');
+    }
+});
+
+// Quand l'utilisateur commence à taper
+userInput.addEventListener('focus', () => {
+    isTyping = true;
+    headerRobot.classList.remove('looking-left', 'looking-right');
+    headerRobot.classList.add('looking-down');
+});
+
+userInput.addEventListener('blur', () => {
+    isTyping = false;
+    headerRobot.classList.remove('looking-down');
+});
+
+// Animation quand on tape
+userInput.addEventListener('input', () => {
+    headerRobot.classList.add('thinking');
+    setTimeout(() => headerRobot.classList.remove('thinking'), 500);
+});
+
+// Animation excitée quand on envoie
+function robotExcited() {
+    headerRobot.classList.add('excited');
+    setTimeout(() => headerRobot.classList.remove('excited'), 500);
+}
+
+// Animation de parole
+function robotTalk(duration) {
+    headerRobot.classList.add('talking');
+    setTimeout(() => {
+        headerRobot.classList.remove('talking');
+    }, duration);
+}
+
+// Charger l'historique au démarrage
+loadHistory();
+
+// Charger le thème sauvegardé
+loadTheme();
+
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeToggle').textContent = '☀️';
+    }
+}
+
+function toggleTheme() {
+    const body = document.body;
+    const themeToggle = document.getElementById('themeToggle');
+    
+    body.classList.toggle('dark-mode');
+    
+    if (body.classList.contains('dark-mode')) {
+        themeToggle.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        themeToggle.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    }
+    
+    // Animation du robot lors du changement de thème
+    robotExcited();
+}
+
+function loadHistory() {
+    const saved = localStorage.getItem('chatHistory');
+    if (saved) {
+        conversations = JSON.parse(saved);
+        renderHistory();
+    }
+}
+
+function saveHistory() {
+    localStorage.setItem('chatHistory', JSON.stringify(conversations));
+}
+
+function renderHistory() {
+    historyList.innerHTML = '';
+    conversations.forEach((conv, index) => {
+        const item = document.createElement('div');
+        item.className = 'history-item' + (conv.id === currentConversationId ? ' active' : '');
+        item.innerHTML = `
+            <span>💬</span>
+            <span>${conv.title}</span>
+        `;
+        item.onclick = () => loadConversation(conv.id);
+        historyList.appendChild(item);
+    });
+}
+
+function startNewChat() {
+    currentConversationId = Date.now().toString();
+    const newConv = {
+        id: currentConversationId,
+        title: 'Nouvelle conversation',
+        messages: [],
+        timestamp: new Date().toISOString()
+    };
+    conversations.unshift(newConv);
+    saveHistory();
+    renderHistory();
+    chatBody.innerHTML = '';
+    emptyState.style.display = 'flex';
+    if (window.innerWidth <= 768) toggleSidebar();
+}
+
+function loadConversation(id) {
+    currentConversationId = id;
+    const conv = conversations.find(c => c.id === id);
+    if (!conv) return;
+    
+    chatBody.innerHTML = '';
+    emptyState.style.display = 'none';
+    
+    conv.messages.forEach(msg => {
+        appendMessage(msg.text, msg.sender, false);
+    });
+    
+    renderHistory();
+    if (window.innerWidth <= 768) toggleSidebar();
+}
+
+function appendMessage(text, sender = 'bot', save = true) {
+    emptyState.style.display = 'none';
+    
+    const messageGroup = document.createElement('div');
+    messageGroup.className = 'message-group';
+    
+    const avatar = document.createElement('div');
+    avatar.className = `message-avatar ${sender}-avatar`;
+    avatar.textContent = sender === 'user' ? 'V' : '🤖';
+    
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    
+    const text_div = document.createElement('div');
+    text_div.className = 'message-text';
+    text_div.textContent = text;
+    
+    content.appendChild(text_div);
+    messageGroup.appendChild(avatar);
+    messageGroup.appendChild(content);
+    chatBody.appendChild(messageGroup);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    
+    if (save) {
+        const conv = conversations.find(c => c.id === currentConversationId);
+        if (conv) {
+            conv.messages.push({ text, sender });
+            if (conv.messages.length === 2 && sender === 'bot') {
+                conv.title = conv.messages[0].text.substring(0, 50) + '...';
+                renderHistory();
+            }
+            saveHistory();
+        }
+    }
+}
+
+function showTyping() {
+    const messageGroup = document.createElement('div');
+    messageGroup.className = 'message-group';
+    
+    const avatar = document.createElement('div');
+    avatar.className = 'message-avatar bot-avatar';
+    avatar.textContent = '🤖';
+    
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    
+    const typing = document.createElement('div');
+    typing.className = 'typing-indicator';
+    typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    
+    content.appendChild(typing);
+    messageGroup.appendChild(avatar);
+    messageGroup.appendChild(content);
+    chatBody.appendChild(messageGroup);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    
+    return messageGroup;
+}
+
+async function sendMessage() {
+    const question = userInput.value.trim();
+    if (!question) return;
+    
+    if (!currentConversationId) {
+        startNewChat();
+    }
+    
+    robotExcited(); // Robot excité quand on envoie !
+    
+    appendMessage(question, 'user');
+    userInput.value = '';
+    userInput.style.height = 'auto';
+    sendBtn.disabled = true;
+    
+    const typingMsg = showTyping();
+    
+    try {
+        const res = await fetch('https://chatbrutiapi.onrender.com/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+        typingMsg.remove();
+        
+        // Robot parle pendant l'affichage de la réponse
+        const responseLength = data.response.length;
+        const talkDuration = Math.min(responseLength * 20, 3000); // Max 3 secondes
+        robotTalk(talkDuration);
+        
+        appendMessage(data.response, 'bot');
+    } catch (e) {
+        typingMsg.remove();
+        robotTalk(1000); // Parle même pour les erreurs
+        appendMessage('❌ Erreur: Impossible de contacter le serveur. Veuillez réessayer.', 'bot');
+    } finally {
+        sendBtn.disabled = false;
+    }
+}
+
+function handleKeyPress(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+}
+
+function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+
+// Auto-resize textarea
+userInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+});
+
+// Initialiser avec une nouvelle conversation
+if (conversations.length === 0) {
+    startNewChat();
+}
+</script>
+</body>
+</html>
